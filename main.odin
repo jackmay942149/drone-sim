@@ -14,8 +14,8 @@ main :: proc() {
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
-		rl.ClearBackground(rl.WHITE)
-		rl.DrawText("Hello, World!", 200, 200, 20, rl.LIGHTGRAY)
+		rl.ClearBackground(rl.GRAY)
+		rl.DrawRectangle(400 - 100, 300 - 50, 200, 100, rl.GREEN)
 		rl.EndDrawing()
 	}
 }
