@@ -22,3 +22,8 @@ In root directory:
 `e` - Apply clockwise torque
 `[space]` - Pauses simulation
 
+# Modules
+## Physics
+Is responsible for managing a physics simulation and must be independent of rendering to provide the ability for visualisations, automations, training, testing, and playback
+
+

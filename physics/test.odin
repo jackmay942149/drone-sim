@@ -1,4 +1,4 @@
-package main
+package physics
 
 import "core:testing"
 
@@ -10,8 +10,8 @@ test_torque :: proc(t: ^testing.T) {
 	}
 
 	for i in 0 ..< 120 {
-		body_add_torque(&body, 1)
-		physics_update(&body, 1.0 / 120.0)
+		add_torque(&body, 1)
+		update(&body, 1.0 / 120.0)
 	}
 
 	testing.expectf(
