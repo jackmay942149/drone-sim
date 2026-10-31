@@ -3,6 +3,7 @@ package main
 import "core:c"
 import "core:log"
 
+import "core:math"
 import la "core:math/linalg"
 
 import rl "vendor:raylib"
@@ -23,11 +24,14 @@ physics_accumulator: f32 = 0
 gravity :: 9.81
 
 Body :: struct {
-	position:  la.Vector2f32,
-	size:      la.Vector2f32,
-	velocity:  la.Vector2f32,
-	net_force: la.Vector2f32,
-	mass:      f32,
+	position:         la.Vector2f32,
+	size:             la.Vector2f32,
+	velocity:         la.Vector2f32,
+	net_force:        la.Vector2f32,
+	mass:             f32,
+	angle:            f32,
+	angular_velocity: f32,
+	net_torque:       f32,
 }
 
 body_add_force :: proc(body: ^Body, force: la.Vector2f32) {
@@ -41,6 +45,17 @@ body_add_gravity :: proc(body: ^Body) {
 	body_add_force(body, body.mass * la.Vector2f32{0, -gravity})
 }
 
+body_add_torque :: proc(body: ^Body, torque: f32) {
+	assert(body != nil)
+	body.net_torque += torque
+}
+
+body_moment_of_inertia :: proc(body: Body) -> f32 {
+	w_sqrd := body.size.x * body.size.x
+	h_sqrd := body.size.y * body.size.y
+	return body.mass * (w_sqrd + h_sqrd) / 12
+}
+
 physics_update :: proc(body: ^Body, dt: f32) {
 	assert(body != nil)
 	assert(body.mass > 0)
@@ -52,16 +67,29 @@ physics_update :: proc(body: ^Body, dt: f32) {
 	// Get velocity semi-implicit Euler integration
 	body.velocity += acceleration * dt
 	body.position += body.velocity * dt
+
+	angular_acceleration := body.net_torque / body_moment_of_inertia(body^)
+	body.net_torque = 0
+
+	body.angular_velocity += angular_acceleration * dt
+	body.angle += body.angular_velocity * dt
 }
 
 /* --- Renderer ---  */
 draw_body :: proc(body: Body) {
 	pos_x, pos_y := world_to_screen(body.position)
 	size := body.size * ppm
-	offset_x := i32(body.size.x * ppm) / 2
-	offset_y := i32(body.size.y * ppm) / 2
 
-	rl.DrawRectangle(pos_x - offset_x, pos_y - offset_y, i32(size.x), i32(size.y), rl.BLUE)
+	// rl.DrawRectangle(pos_x - offset_x, pos_y - offset_y, i32(size.x), i32(size.y), rl.BLUE)
+	rec := rl.Rectangle {
+		x      = f32(pos_x),
+		y      = f32(pos_y),
+		width  = size.x,
+		height = size.y,
+	}
+
+	origin := rl.Vector2{size.x / 2, size.y / 2}
+	rl.DrawRectanglePro(rec, origin, -body.angle * 180 / math.PI, rl.BLUE)
 }
 
 draw_grid :: proc(delta_x, delta_y: f32) {
@@ -103,7 +131,6 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 body_initial :: Body {
 	position = {0, 0},
 	size     = {1, 1},
-	velocity = {2, 0},
 	mass     = 1,
 }
 
@@ -134,6 +161,14 @@ main :: proc() {
 			gravity_enabled = !gravity_enabled
 		}
 
+		torque: f32 = 0
+		if rl.IsKeyDown(.E) {
+			torque -= 1
+		}
+		if rl.IsKeyDown(.Q) {
+			torque += 1
+		}
+
 		// Physics
 		if (!paused) {
 			physics_accumulator += delta
@@ -143,6 +178,8 @@ main :: proc() {
 			if gravity_enabled {
 				body_add_gravity(&body)
 			}
+
+			body_add_torque(&body, torque)
 
 			physics_update(&body, physics_tick)
 			physics_accumulator -= physics_tick

@@ -18,5 +18,7 @@ In root directory:
 # Controls
 `r` - Resets scene
 `g` - Toggles gravity
+`q` - Apply anticlockwise torque
+`e` - Apply clockwise torque
 `[space]` - Pauses simulation
 
