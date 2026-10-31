@@ -101,6 +101,7 @@ main :: proc() {
 		// Input
 		if rl.IsKeyPressed(.R) {
 			body = body_initial
+			physics_accumulator = 0
 		}
 		if rl.IsKeyPressed(.SPACE) {
 			paused = !paused
@@ -111,7 +112,7 @@ main :: proc() {
 			physics_accumulator += delta
 		}
 
-		for physics_accumulator > physics_tick {
+		for physics_accumulator >= physics_tick {
 			physics_update(&body, physics_tick)
 			physics_accumulator -= physics_tick
 		}
