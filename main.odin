@@ -1,5 +1,6 @@
 package main
 
+import "core:c"
 import "core:log"
 
 import la "core:math/linalg"
@@ -29,7 +30,43 @@ draw_body :: proc(body: Body) {
 	offset_x := i32(body.size.x * ppm) / 2
 	offset_y := i32(body.size.y * ppm) / 2
 
-	rl.DrawRectangle(pos_x - offset_x, pos_y - offset_y, i32(size.x), i32(size.y), rl.GREEN)
+	rl.DrawRectangle(pos_x - offset_x, pos_y - offset_y, i32(size.x), i32(size.y), rl.BLUE)
+}
+
+draw_grid :: proc(delta_x, delta_y: f32) {
+	// Draw Axis
+	origin_x, origin_y := world_to_screen(la.Vector2f32{})
+	rl.DrawLine(c.INT32_MIN, origin_y, c.INT32_MAX, origin_y, rl.RED)
+	rl.DrawLine(origin_x, c.INT32_MIN, origin_x, c.INT32_MAX, rl.GREEN)
+
+	// Draw minor horizontals
+	offset_x: f32 = 0
+	for true {
+		offset_x += delta_x
+		line_x_pos, _ := world_to_screen(la.Vector2f32{offset_x, 0})
+		line_x_neg, _ := world_to_screen(la.Vector2f32{-offset_x, 0})
+
+		if line_x_pos > window_size.x {
+			break
+		}
+		rl.DrawLine(line_x_pos, c.INT32_MIN, line_x_pos, c.INT32_MAX, rl.BLACK)
+		rl.DrawLine(line_x_neg, c.INT32_MIN, line_x_neg, c.INT32_MAX, rl.BLACK)
+	}
+
+	// Draw minor verticals
+	offset_y: f32 = 0
+	for true {
+		offset_y += delta_y
+		_, line_y_pos := world_to_screen(la.Vector2f32{0, offset_y})
+		_, line_y_neg := world_to_screen(la.Vector2f32{0, -offset_y})
+
+		if line_y_pos < 0 {
+			break
+		}
+		rl.DrawLine(c.INT32_MIN, line_y_pos, c.INT32_MAX, line_y_pos, rl.BLACK)
+		rl.DrawLine(c.INT32_MIN, line_y_neg, c.INT32_MAX, line_y_neg, rl.BLACK)
+	}
+
 }
 
 main :: proc() {
@@ -49,6 +86,7 @@ main :: proc() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.GRAY)
 
+		draw_grid(0.5, 0.5)
 		draw_body(body)
 
 		rl.EndDrawing()
