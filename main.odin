@@ -9,7 +9,7 @@ import rl "vendor:raylib"
 
 /* --- Window ---  */
 window_size :: [2]i32{800, 600}
-ppm :: f32(window_size.y) / 4 // Makes vertical height be 4m regardless of window size
+ppm :: f32(window_size.y) / 10 // Makes vertical height be 10m regardless of window size
 
 world_to_screen :: proc(world: la.Vector2f32) -> (x: i32, y: i32) {
 	x = window_size.x / 2 + i32(world.x * ppm)
@@ -21,6 +21,7 @@ world_to_screen :: proc(world: la.Vector2f32) -> (x: i32, y: i32) {
 Body :: struct {
 	position: la.Vector2f32,
 	size:     la.Vector2f32,
+	velocity: la.Vector2f32,
 }
 
 /* --- Renderer ---  */
@@ -49,8 +50,8 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 		if line_x_pos > window_size.x {
 			break
 		}
-		rl.DrawLine(line_x_pos, c.INT32_MIN, line_x_pos, c.INT32_MAX, rl.BLACK)
-		rl.DrawLine(line_x_neg, c.INT32_MIN, line_x_neg, c.INT32_MAX, rl.BLACK)
+		rl.DrawLine(line_x_pos, 0, line_x_pos, window_size.y, rl.BLACK)
+		rl.DrawLine(line_x_neg, 0, line_x_neg, window_size.y, rl.BLACK)
 	}
 
 	// Draw minor verticals
@@ -63,8 +64,8 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 		if line_y_pos < 0 {
 			break
 		}
-		rl.DrawLine(c.INT32_MIN, line_y_pos, c.INT32_MAX, line_y_pos, rl.BLACK)
-		rl.DrawLine(c.INT32_MIN, line_y_neg, c.INT32_MAX, line_y_neg, rl.BLACK)
+		rl.DrawLine(0, line_y_pos, window_size.x, line_y_pos, rl.BLACK)
+		rl.DrawLine(0, line_y_neg, window_size.x, line_y_neg, rl.BLACK)
 	}
 
 }
@@ -86,7 +87,7 @@ main :: proc() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.GRAY)
 
-		draw_grid(0.5, 0.5)
+		draw_grid(1, 1)
 		draw_body(body)
 
 		rl.EndDrawing()
