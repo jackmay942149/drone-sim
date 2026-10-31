@@ -137,13 +137,13 @@ main :: proc() {
 		// Physics
 		if (!paused) {
 			physics_accumulator += delta
-
-			if gravity_enabled {
-				body_add_gravity(&body)
-			}
 		}
 
 		for physics_accumulator >= physics_tick {
+			if gravity_enabled {
+				body_add_gravity(&body)
+			}
+
 			physics_update(&body, physics_tick)
 			physics_accumulator -= physics_tick
 		}

@@ -17,5 +17,6 @@ In root directory:
 
 # Controls
 `r` - Resets scene
+`g` - Toggles gravity
 `[space]` - Pauses simulation
 
