@@ -15,3 +15,7 @@ In root directory:
 | :---: | :---: | :---: | :---: |
 | Odin | dev-2026-10-nightly | scoop | Confirmed |
 
+# Controls
+`r` - Resets scene
+`[space]` - Pauses simulation
+
