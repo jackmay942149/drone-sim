@@ -51,8 +51,10 @@ body_add_torque :: proc(body: ^Body, torque: f32) {
 }
 
 body_moment_of_inertia :: proc(body: Body) -> f32 {
+	assert(body.mass > 0)
 	w_sqrd := body.size.x * body.size.x
 	h_sqrd := body.size.y * body.size.y
+	assert(w_sqrd + w_sqrd > 0)
 	return body.mass * (w_sqrd + h_sqrd) / 12
 }
 
