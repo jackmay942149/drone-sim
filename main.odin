@@ -90,6 +90,7 @@ main :: proc() {
 	physics_accumulator: f32 = 0
 	body := body_initial
 	paused := false
+	gravity_enabled := false
 
 	for !rl.WindowShouldClose() {
 		delta := rl.GetFrameTime()
@@ -103,7 +104,7 @@ main :: proc() {
 			paused = !paused
 		}
 		if rl.IsKeyPressed(.G) {
-			physics.toggle_gravity()
+			gravity_enabled = !gravity_enabled
 		}
 
 		torque: f32 = 0
@@ -120,6 +121,10 @@ main :: proc() {
 		}
 
 		for physics_accumulator >= physics.tick {
+			if gravity_enabled {
+				physics.add_gravity(&body)
+			}
+
 			physics.add_torque(&body, torque)
 			physics.update(&body, physics.tick)
 			physics_accumulator -= physics.tick
@@ -138,7 +143,7 @@ main :: proc() {
 			rl.DrawText("Running", 10, 10, 20, rl.GREEN)
 		}
 
-		if physics.is_gravity_enabled() {
+		if gravity_enabled {
 			rl.DrawText("Gravity: Enabled", 10, 30, 20, rl.GREEN)
 		} else {
 			rl.DrawText("Gravity: Disabled", 10, 30, 20, rl.RED)

@@ -5,25 +5,9 @@ tick :: 1.0 / 120.0
 @(private)
 gravity :: 9.81
 
-@(private)
-gravity_enabled := false
-
-toggle_gravity :: proc() {
-	gravity_enabled = !gravity_enabled
-
-}
-
-is_gravity_enabled :: proc() -> bool {
-	return gravity_enabled
-}
-
 update :: proc(body: ^Body, dt: f32) {
 	assert(body != nil)
 	assert(body.mass > 0)
-
-	if gravity_enabled {
-		add_gravity(body)
-	}
 
 	// Get acceleration newton's second law
 	acceleration := body.net_force / body.mass
