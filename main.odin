@@ -20,15 +20,37 @@ world_to_screen :: proc(world: la.Vector2f32) -> (x: i32, y: i32) {
 /* --- Physics ---  */
 physics_tick :: 1.0 / 120.0
 physics_accumulator: f32 = 0
+gravity :: 9.81
 
 Body :: struct {
-	position: la.Vector2f32,
-	size:     la.Vector2f32,
-	velocity: la.Vector2f32,
+	position:  la.Vector2f32,
+	size:      la.Vector2f32,
+	velocity:  la.Vector2f32,
+	net_force: la.Vector2f32,
+	mass:      f32,
+}
+
+body_add_force :: proc(body: ^Body, force: la.Vector2f32) {
+	assert(body != nil)
+	body.net_force += force
+}
+
+body_add_gravity :: proc(body: ^Body) {
+	assert(body != nil)
+	assert(body.mass > 0)
+	body_add_force(body, body.mass * la.Vector2f32{0, -gravity})
 }
 
 physics_update :: proc(body: ^Body, dt: f32) {
 	assert(body != nil)
+	assert(body.mass > 0)
+
+	// Get acceleration newton's second law
+	acceleration := body.net_force / body.mass
+	body.net_force = {}
+
+	// Get velocity semi-implicit Euler integration
+	body.velocity += acceleration * dt
 	body.position += body.velocity * dt
 }
 
@@ -82,6 +104,7 @@ body_initial :: Body {
 	position = {0, 0},
 	size     = {1, 1},
 	velocity = {2, 0},
+	mass     = 1,
 }
 
 main :: proc() {
@@ -94,6 +117,7 @@ main :: proc() {
 
 	body := body_initial
 	paused := false
+	gravity_enabled := false
 
 	for !rl.WindowShouldClose() {
 		delta := rl.GetFrameTime()
@@ -106,10 +130,17 @@ main :: proc() {
 		if rl.IsKeyPressed(.SPACE) {
 			paused = !paused
 		}
+		if rl.IsKeyPressed(.G) {
+			gravity_enabled = !gravity_enabled
+		}
 
 		// Physics
 		if (!paused) {
 			physics_accumulator += delta
+
+			if gravity_enabled {
+				body_add_gravity(&body)
+			}
 		}
 
 		for physics_accumulator >= physics_tick {
@@ -123,6 +154,18 @@ main :: proc() {
 
 		draw_grid(1, 1)
 		draw_body(body)
+
+		if paused {
+			rl.DrawText("Paused", 10, 10, 20, rl.RED)
+		} else {
+			rl.DrawText("Running", 10, 10, 20, rl.GREEN)
+		}
+
+		if gravity_enabled {
+			rl.DrawText("Gravity: Enabled", 10, 30, 20, rl.GREEN)
+		} else {
+			rl.DrawText("Gravity: Disabled", 10, 30, 20, rl.RED)
+		}
 
 		rl.EndDrawing()
 	}
