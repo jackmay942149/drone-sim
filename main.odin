@@ -11,7 +11,7 @@ import rl "vendor:raylib"
 import "./physics"
 
 /* --- Window ---  */
-window_size :: [2]i32{800, 600}
+window_size :: [2]i32{1800, 1080}
 ppm :: f32(window_size.y) / 10 // Makes vertical height be 10m regardless of window size
 
 world_to_screen :: proc(world: la.Vector2f32) -> (x: i32, y: i32) {
@@ -75,8 +75,13 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 
 body_initial :: physics.Body {
 	position = {0, 0},
-	size     = {1, 1},
+	size     = {0.6, 0.1},
 	mass     = 1,
+}
+
+Motor :: struct {
+	speed:  f32,
+	offset: f32,
 }
 
 main :: proc() {
@@ -91,6 +96,15 @@ main :: proc() {
 	body := body_initial
 	paused := false
 	gravity_enabled := false
+
+	l_motor := Motor {
+		speed  = 0,
+		offset = -0.5,
+	}
+	r_motor := Motor {
+		speed  = 0,
+		offset = 0.5,
+	}
 
 	for !rl.WindowShouldClose() {
 		delta := rl.GetFrameTime()
@@ -107,12 +121,15 @@ main :: proc() {
 			gravity_enabled = !gravity_enabled
 		}
 
-		torque: f32 = 0
 		if rl.IsKeyDown(.E) {
-			torque -= 1
+			r_motor.speed += 0.2
+		} else {
+			r_motor.speed /= 1.1
 		}
 		if rl.IsKeyDown(.Q) {
-			torque += 1
+			l_motor.speed += 0.2
+		} else {
+			l_motor.speed /= 1.1
 		}
 
 		// Physics
@@ -125,7 +142,13 @@ main :: proc() {
 				physics.add_gravity(&body)
 			}
 
-			physics.add_torque(&body, torque)
+			l_motor_world_pos := physics.local_to_world(body, {l_motor.offset, 0})
+			r_motor_world_pos := physics.local_to_world(body, {r_motor.offset, 0})
+			l_motor_force := physics.local_to_world(body, {0, l_motor.speed})
+			r_motor_force := physics.local_to_world(body, {0, r_motor.speed})
+
+			physics.add_force_at_point(&body, l_motor_force, l_motor_world_pos)
+			physics.add_force_at_point(&body, r_motor_force, r_motor_world_pos)
 			physics.update(&body, physics.tick)
 			physics_accumulator -= physics.tick
 		}
