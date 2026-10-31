@@ -24,6 +24,11 @@ Body :: struct {
 	velocity: la.Vector2f32,
 }
 
+physics_update :: proc(body: ^Body, dt: f32) {
+	assert(body != nil)
+	body.position += body.velocity * dt
+}
+
 /* --- Renderer ---  */
 draw_body :: proc(body: Body) {
 	pos_x, pos_y := world_to_screen(body.position)
