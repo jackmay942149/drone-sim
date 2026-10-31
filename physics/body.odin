@@ -23,7 +23,7 @@ add_force_at_point :: proc(body: ^Body, force: la.Vector2f32, point: la.Vector2f
 	assert(body != nil)
 	r := point - body.position
 
-	torque := r.x * force.x - r.y * force.y
+	torque := r.x * force.y - r.y * force.x
 	add_torque(body, torque)
 	add_force(body, force)
 }
@@ -53,6 +53,12 @@ local_to_world :: proc(parent: Body, local: la.Vector2f32) -> (world: la.Vector2
 	parent_pos := parent.position
 	world.x = parent_pos.x + local.x * math.cos(parent.angle) - local.y * math.sin(parent.angle)
 	world.y = parent_pos.y + local.x * math.sin(parent.angle) + local.y * math.cos(parent.angle)
+	return
+}
+
+local_force_to_world :: proc(parent: Body, local: la.Vector2f32) -> (world: la.Vector2f32) {
+	world.x = local.x * math.cos(parent.angle) - local.y * math.sin(parent.angle)
+	world.y = local.x * math.sin(parent.angle) + local.y * math.cos(parent.angle)
 	return
 }
 

@@ -75,12 +75,12 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 
 body_initial :: physics.Body {
 	position = {0, 0},
-	size     = {0.6, 0.1},
+	size     = {1.2, 0.1},
 	mass     = 1,
 }
 
 Motor :: struct {
-	speed:  f32,
+	thrust: f32,
 	offset: f32,
 }
 
@@ -98,11 +98,11 @@ main :: proc() {
 	gravity_enabled := false
 
 	l_motor := Motor {
-		speed  = 0,
+		thrust = 0,
 		offset = -0.5,
 	}
 	r_motor := Motor {
-		speed  = 0,
+		thrust = 0,
 		offset = 0.5,
 	}
 
@@ -113,6 +113,8 @@ main :: proc() {
 		if rl.IsKeyPressed(.R) {
 			body = body_initial
 			physics_accumulator = 0
+			l_motor.thrust = 0
+			r_motor.thrust = 0
 		}
 		if rl.IsKeyPressed(.SPACE) {
 			paused = !paused
@@ -121,15 +123,17 @@ main :: proc() {
 			gravity_enabled = !gravity_enabled
 		}
 
-		if rl.IsKeyDown(.E) {
-			r_motor.speed += 0.2
+		if rl.IsKeyDown(.Q) && !paused {
+			r_motor.thrust += 15 * delta
+			r_motor.thrust = min(r_motor.thrust, 10)
 		} else {
-			r_motor.speed /= 1.1
+			r_motor.thrust /= 1.1
 		}
-		if rl.IsKeyDown(.Q) {
-			l_motor.speed += 0.2
+		if rl.IsKeyDown(.E) && !paused {
+			l_motor.thrust += 15 * delta
+			l_motor.thrust = min(l_motor.thrust, 10)
 		} else {
-			l_motor.speed /= 1.1
+			l_motor.thrust /= 1.1
 		}
 
 		// Physics
@@ -144,8 +148,8 @@ main :: proc() {
 
 			l_motor_world_pos := physics.local_to_world(body, {l_motor.offset, 0})
 			r_motor_world_pos := physics.local_to_world(body, {r_motor.offset, 0})
-			l_motor_force := physics.local_to_world(body, {0, l_motor.speed})
-			r_motor_force := physics.local_to_world(body, {0, r_motor.speed})
+			l_motor_force := physics.local_force_to_world(body, {0, l_motor.thrust})
+			r_motor_force := physics.local_force_to_world(body, {0, r_motor.thrust})
 
 			physics.add_force_at_point(&body, l_motor_force, l_motor_world_pos)
 			physics.add_force_at_point(&body, r_motor_force, r_motor_world_pos)

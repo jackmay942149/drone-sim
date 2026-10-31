@@ -18,8 +18,8 @@ In root directory:
 # Controls
 `r` - Resets scene
 `g` - Toggles gravity
-`q` - Apply anticlockwise torque
-`e` - Apply clockwise torque
+`q` - Activate right thruster
+`e` - Activate left thruster
 `[space]` - Pauses simulation
 
 # Modules
