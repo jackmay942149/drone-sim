@@ -18,6 +18,9 @@ world_to_screen :: proc(world: la.Vector2f32) -> (x: i32, y: i32) {
 }
 
 /* --- Physics ---  */
+physics_tick :: 1.0 / 120.0
+physics_accumulator: f32 = 0
+
 Body :: struct {
 	position: la.Vector2f32,
 	size:     la.Vector2f32,
@@ -86,9 +89,17 @@ main :: proc() {
 	body := Body {
 		position = {0, 0},
 		size     = {1, 1},
+		velocity = {2, 0},
 	}
 
 	for !rl.WindowShouldClose() {
+		delta := rl.GetFrameTime()
+		physics_accumulator += delta
+
+		for physics_accumulator > physics_tick {
+			physics_update(&body, physics_tick)
+			physics_accumulator -= physics_tick
+		}
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.GRAY)
 
