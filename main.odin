@@ -78,6 +78,12 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 
 }
 
+body_initial :: Body {
+	position = {0, 0},
+	size     = {1, 1},
+	velocity = {2, 0},
+}
+
 main :: proc() {
 	context.logger = log.create_console_logger()
 
@@ -86,20 +92,31 @@ main :: proc() {
 
 	rl.SetTargetFPS(60)
 
-	body := Body {
-		position = {0, 0},
-		size     = {1, 1},
-		velocity = {2, 0},
-	}
+	body := body_initial
+	paused := false
 
 	for !rl.WindowShouldClose() {
 		delta := rl.GetFrameTime()
-		physics_accumulator += delta
+
+		// Input
+		if rl.IsKeyPressed(.R) {
+			body = body_initial
+		}
+		if rl.IsKeyPressed(.SPACE) {
+			paused = !paused
+		}
+
+		// Physics
+		if (!paused) {
+			physics_accumulator += delta
+		}
 
 		for physics_accumulator > physics_tick {
 			physics_update(&body, physics_tick)
 			physics_accumulator -= physics_tick
 		}
+
+		// Rendering
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.GRAY)
 
