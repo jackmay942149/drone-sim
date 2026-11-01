@@ -123,17 +123,19 @@ main :: proc() {
 			gravity_enabled = !gravity_enabled
 		}
 
-		if rl.IsKeyDown(.Q) && !paused {
+		if rl.IsKeyDown(.E) && !paused {
 			r_motor.thrust += 15 * delta
 			r_motor.thrust = min(r_motor.thrust, 10)
-		} else {
-			r_motor.thrust /= 1.1
+		} else if !paused {
+			r_motor.thrust -= 15 * delta
+			r_motor.thrust = max(r_motor.thrust, 0)
 		}
-		if rl.IsKeyDown(.E) && !paused {
+		if rl.IsKeyDown(.Q) && !paused {
 			l_motor.thrust += 15 * delta
 			l_motor.thrust = min(l_motor.thrust, 10)
-		} else {
-			l_motor.thrust /= 1.1
+		} else if !paused {
+			l_motor.thrust -= 15 * delta
+			l_motor.thrust = max(l_motor.thrust, 0)
 		}
 
 		// Physics
@@ -163,6 +165,29 @@ main :: proc() {
 
 		draw_grid(1, 1)
 		draw_body(body)
+
+		// Draw motor forces
+		l_motor_world_pos := physics.local_to_world(body, {l_motor.offset, 0})
+		l_pos_x, l_pos_y := world_to_screen(l_motor_world_pos)
+		l_motor_force := physics.local_force_to_world(body, {0, l_motor.thrust})
+		rl.DrawLine(
+			l_pos_x,
+			l_pos_y,
+			l_pos_x - i32(l_motor_force.x * ppm),
+			l_pos_y - i32(l_motor_force.y * ppm),
+			rl.WHITE,
+		)
+
+		r_motor_world_pos := physics.local_to_world(body, {r_motor.offset, 0})
+		r_pos_x, r_pos_y := world_to_screen(r_motor_world_pos)
+		r_motor_force := physics.local_force_to_world(body, {0, r_motor.thrust})
+		rl.DrawLine(
+			r_pos_x,
+			r_pos_y,
+			r_pos_x - i32(r_motor_force.x * ppm),
+			r_pos_y - i32(r_motor_force.y * ppm),
+			rl.WHITE,
+		)
 
 		if paused {
 			rl.DrawText("Paused", 10, 10, 20, rl.RED)
