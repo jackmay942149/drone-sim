@@ -10,6 +10,11 @@ In root directory:
 In root directory: 
 `odin build .`
 
+## Test
+### Physics
+In root directory:
+`odin test .\physics\`
+
 # Dependencies
 | Name | Version | Installation | Status |
 | :---: | :---: | :---: | :---: |
@@ -18,8 +23,8 @@ In root directory:
 # Controls
 `r` - Resets scene
 `g` - Toggles gravity
-`q` - Activate right thruster
-`e` - Activate left thruster
+`q` - Activate left thruster
+`e` - Activate right thruster
 `[space]` - Pauses simulation
 
 # Modules
@@ -29,5 +34,6 @@ Is responsible for managing a physics simulation and must be independent of rend
 # Conventions
 ## Force Visualisation
 A visualiser will show a force of 1N as 1m in world space
+Forces are visualised in the direction they are acting
 
 
