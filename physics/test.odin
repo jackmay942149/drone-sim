@@ -133,3 +133,29 @@ test_torque_from_offcentre_force :: proc(t: ^testing.T) {
 	)
 }
 
+@(test)
+test_balanced_force :: proc(t: ^testing.T) {
+	body := Body {
+		mass = 1,
+		size = {1, 1},
+	}
+	add_force_at_point(&body, {0, 10}, {-0.5, 0})
+	add_force_at_point(&body, {0, 10}, {0.5, 0})
+
+	testing.expectf(t, abs(body.net_torque) < float_error, "Expected: 0\nGot: %f", body.net_torque)
+
+	testing.expectf(
+		t,
+		abs(body.net_force.x) < float_error,
+		"Expected: 0\nGot: %f",
+		body.net_force.x,
+	)
+
+	testing.expectf(
+		t,
+		abs(body.net_force.y - 20) < float_error,
+		"Expected: 20\nGot: %f",
+		body.net_force.y,
+	)
+}
+
