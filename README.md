@@ -26,4 +26,8 @@ In root directory:
 ## Physics
 Is responsible for managing a physics simulation and must be independent of rendering to provide the ability for visualisations, automations, training, testing, and playback
 
+# Conventions
+## Force Visualisation
+A visualiser will show a force of 1N as 1m in world space
+
 

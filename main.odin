@@ -173,7 +173,7 @@ main :: proc() {
 		rl.DrawLine(
 			l_pos_x,
 			l_pos_y,
-			l_pos_x - i32(l_motor_force.x * ppm),
+			l_pos_x + i32(l_motor_force.x * ppm),
 			l_pos_y - i32(l_motor_force.y * ppm),
 			rl.WHITE,
 		)
@@ -184,7 +184,7 @@ main :: proc() {
 		rl.DrawLine(
 			r_pos_x,
 			r_pos_y,
-			r_pos_x - i32(r_motor_force.x * ppm),
+			r_pos_x + i32(r_motor_force.x * ppm),
 			r_pos_y - i32(r_motor_force.y * ppm),
 			rl.WHITE,
 		)
