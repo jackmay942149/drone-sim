@@ -3,7 +3,7 @@ package physics
 import "core:testing"
 
 @(private = "file")
-float_error :: 0.1
+float_error :: 0.001
 
 @(test)
 test_angular_velocity :: proc(t: ^testing.T) {
@@ -41,7 +41,7 @@ test_linear_velocity :: proc(t: ^testing.T) {
 		t,
 		abs(body.velocity.x - 5) < float_error,
 		"Expected: 5\nGot: %f",
-		body.velocity,
+		body.velocity.x,
 	)
 }
 
@@ -119,9 +119,17 @@ test_torque_from_offcentre_force :: proc(t: ^testing.T) {
 		t,
 		abs(body.net_torque - 5) < float_error,
 		"Expected: 5\nGot: %f",
-		body.net_force.y,
+		body.net_torque,
 	)
 
+	update(&body, 0)
+	add_force_at_point(&body, {0, 10}, {-0.5, 0})
 
+	testing.expectf(
+		t,
+		abs(body.net_torque + 5) < float_error,
+		"Expected: 5\nGot: %f",
+		body.net_torque,
+	)
 }
 
