@@ -76,7 +76,7 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 body_initial :: physics.Body {
 	position = {0, 0},
 	size     = {1.2, 0.1},
-	mass     = 1,
+	mass     = 0.125,
 }
 
 Motor :: struct {
@@ -125,14 +125,14 @@ main :: proc() {
 
 		if rl.IsKeyDown(.E) && !paused {
 			r_motor.thrust += 15 * delta
-			r_motor.thrust = min(r_motor.thrust, 10)
+			r_motor.thrust = min(r_motor.thrust, 11)
 		} else if !paused {
 			r_motor.thrust -= 15 * delta
 			r_motor.thrust = max(r_motor.thrust, 0)
 		}
 		if rl.IsKeyDown(.Q) && !paused {
 			l_motor.thrust += 15 * delta
-			l_motor.thrust = min(l_motor.thrust, 10)
+			l_motor.thrust = min(l_motor.thrust, 11)
 		} else if !paused {
 			l_motor.thrust -= 15 * delta
 			l_motor.thrust = max(l_motor.thrust, 0)
