@@ -1,5 +1,6 @@
 package physics
 
+import "core:math"
 import "core:testing"
 
 @(private = "file")
@@ -157,5 +158,19 @@ test_balanced_force :: proc(t: ^testing.T) {
 		"Expected: 20\nGot: %f",
 		body.net_force.y,
 	)
+}
+
+@(test)
+test_local_to__world_transformation :: proc(t: ^testing.T) {
+	body := Body {
+		mass  = 1,
+		size  = {1, 1},
+		angle = math.PI / 2,
+	}
+	world := local_force_to_world(body, {0, 10})
+
+	testing.expectf(t, abs(world.x + 10) < float_error, "Expected: -10\nGot: %f", world.x)
+	testing.expectf(t, abs(world.y) < float_error, "Expected: 0\nGot: %f", world.y)
+
 }
 
