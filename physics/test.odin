@@ -210,6 +210,40 @@ test_force_and_torque_clearing :: proc(t: ^testing.T) {
 		initial_angular_velocity,
 		body.angular_velocity,
 	)
+}
 
+@(test)
+test_conservation_of_motion :: proc(t: ^testing.T) {
+	body := Body {
+		mass             = 1,
+		size             = {1, 1},
+		velocity         = {1, 1},
+		angular_velocity = 1,
+	}
+
+	for _ in 0 ..< 120 {
+		update(&body, 1.0 / 120.0)
+		testing.expectf(
+			t,
+			abs(body.angular_velocity - 1) < float_error,
+			"Expected: 1\nGot: %f",
+			body.angular_velocity,
+		)
+
+		testing.expectf(
+			t,
+			abs(body.velocity.x - 1) < float_error,
+			"Expected: 1\nGot: %f",
+			body.velocity.x,
+		)
+
+		testing.expectf(
+			t,
+			abs(body.velocity.y - 1) < float_error,
+			"Expected: 1\nGot: %f",
+			body.velocity.y,
+		)
+
+	}
 }
 
