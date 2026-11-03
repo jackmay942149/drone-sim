@@ -106,3 +106,22 @@ test_force_accumulation :: proc(t: ^testing.T) {
 	)
 }
 
+@(test)
+test_torque_from_offcentre_force :: proc(t: ^testing.T) {
+	body := Body {
+		mass     = 1,
+		size     = {1, 1},
+		position = {0, 0},
+	}
+	add_force_at_point(&body, {0, 10}, {0.5, 0})
+
+	testing.expectf(
+		t,
+		abs(body.net_torque - 5) < float_error,
+		"Expected: 5\nGot: %f",
+		body.net_force.y,
+	)
+
+
+}
+
