@@ -171,6 +171,17 @@ test_local_to__world_transformation :: proc(t: ^testing.T) {
 
 	testing.expectf(t, abs(world.x + 10) < float_error, "Expected: -10\nGot: %f", world.x)
 	testing.expectf(t, abs(world.y) < float_error, "Expected: 0\nGot: %f", world.y)
+
+	body = Body {
+		mass     = 1,
+		size     = {1, 1},
+		angle    = math.PI / 2,
+		position = {5, 3},
+	}
+	world = local_force_to_world(body, {0, 10})
+
+	testing.expectf(t, abs(world.x + 10) < float_error, "Expected: -10\nGot: %f", world.x)
+	testing.expectf(t, abs(world.y) < float_error, "Expected: 0\nGot: %f", world.y)
 }
 
 @(test)
@@ -193,14 +204,14 @@ test_force_and_torque_clearing :: proc(t: ^testing.T) {
 		t,
 		abs(body.velocity.x - initial_velocity.x) < float_error,
 		"Expected: %f\nGot: %f",
-		initial_velocity,
+		initial_velocity.x,
 		body.velocity.x,
 	)
 	testing.expectf(
 		t,
 		abs(body.velocity.y - initial_velocity.y) < float_error,
 		"Expected: %f\nGot: %f",
-		initial_velocity,
+		initial_velocity.y,
 		body.velocity.y,
 	)
 	testing.expectf(
