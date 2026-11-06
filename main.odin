@@ -1,10 +1,11 @@
 package main
 
 import "core:c"
+import "core:fmt"
 import "core:log"
-
 import "core:math"
 import la "core:math/linalg"
+import "core:strings"
 
 import rl "vendor:raylib"
 
@@ -21,7 +22,7 @@ world_to_screen :: proc(world: la.Vector2f32) -> (x: i32, y: i32) {
 }
 
 /* --- Renderer ---  */
-draw_body :: proc(body: physics.Body) {
+draw_body :: proc(body: physics.Body, l_motor, r_motor: ^Motor) {
 	pos_x, pos_y := world_to_screen(body.position)
 	size := body.size * ppm
 
@@ -35,6 +36,29 @@ draw_body :: proc(body: physics.Body) {
 
 	origin := rl.Vector2{size.x / 2, size.y / 2}
 	rl.DrawRectanglePro(rec, origin, -body.angle * 180 / math.PI, rl.BLUE)
+
+	// Draw motor forces
+	l_motor_world_pos := physics.local_to_world(body, {l_motor.offset, 0})
+	l_pos_x, l_pos_y := world_to_screen(l_motor_world_pos)
+	l_motor_force := physics.local_force_to_world(body, {0, l_motor.thrust})
+	rl.DrawLine(
+		l_pos_x,
+		l_pos_y,
+		l_pos_x + i32(l_motor_force.x * ppm),
+		l_pos_y - i32(l_motor_force.y * ppm),
+		rl.WHITE,
+	)
+
+	r_motor_world_pos := physics.local_to_world(body, {r_motor.offset, 0})
+	r_pos_x, r_pos_y := world_to_screen(r_motor_world_pos)
+	r_motor_force := physics.local_force_to_world(body, {0, r_motor.thrust})
+	rl.DrawLine(
+		r_pos_x,
+		r_pos_y,
+		r_pos_x + i32(r_motor_force.x * ppm),
+		r_pos_y - i32(r_motor_force.y * ppm),
+		rl.WHITE,
+	)
 }
 
 draw_grid :: proc(delta_x, delta_y: f32) {
@@ -73,10 +97,39 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 
 }
 
+draw_ui :: proc(paused, gravity_enabled: bool, l_motor, r_motor: ^Motor, body: ^physics.Body) {
+	if paused {
+		rl.DrawText("Paused", 10, 10, 20, rl.RED)
+	} else {
+		rl.DrawText("Running", 10, 10, 20, rl.GREEN)
+	}
+
+	if gravity_enabled {
+		rl.DrawText("Gravity: Enabled", 10, 30, 20, rl.GREEN)
+	} else {
+		rl.DrawText("Gravity: Disabled", 10, 30, 20, rl.RED)
+	}
+
+	b := strings.builder_make()
+	fmt.sbprintf(&b, "Thrust Left: %v", l_motor.thrust)
+	rl.DrawText(strings.to_cstring(&b), 10, 50, 20, rl.WHITE)
+
+	strings.builder_reset(&b)
+	fmt.sbprintf(&b, "Thrust Right: %v", r_motor.thrust)
+	rl.DrawText(strings.to_cstring(&b), 10, 70, 20, rl.WHITE)
+
+	strings.builder_reset(&b)
+	fmt.sbprintf(&b, "Position: %v", body.position)
+	rl.DrawText(strings.to_cstring(&b), 10, 90, 20, rl.WHITE)
+
+	strings.builder_reset(&b)
+	fmt.sbprintf(&b, "Angle: %v", math.DEG_PER_RAD * body.angle)
+	rl.DrawText(strings.to_cstring(&b), 10, 110, 20, rl.WHITE)
+}
+
 body_initial :: physics.Body {
-	position = {0, 0},
-	size     = {1.2, 0.1},
-	mass     = 0.125,
+	size = {1.2, 0.1},
+	mass = 0.125,
 }
 
 Motor :: struct {
@@ -164,42 +217,8 @@ main :: proc() {
 		rl.ClearBackground(rl.GRAY)
 
 		draw_grid(1, 1)
-		draw_body(body)
-
-		// Draw motor forces
-		l_motor_world_pos := physics.local_to_world(body, {l_motor.offset, 0})
-		l_pos_x, l_pos_y := world_to_screen(l_motor_world_pos)
-		l_motor_force := physics.local_force_to_world(body, {0, l_motor.thrust})
-		rl.DrawLine(
-			l_pos_x,
-			l_pos_y,
-			l_pos_x + i32(l_motor_force.x * ppm),
-			l_pos_y - i32(l_motor_force.y * ppm),
-			rl.WHITE,
-		)
-
-		r_motor_world_pos := physics.local_to_world(body, {r_motor.offset, 0})
-		r_pos_x, r_pos_y := world_to_screen(r_motor_world_pos)
-		r_motor_force := physics.local_force_to_world(body, {0, r_motor.thrust})
-		rl.DrawLine(
-			r_pos_x,
-			r_pos_y,
-			r_pos_x + i32(r_motor_force.x * ppm),
-			r_pos_y - i32(r_motor_force.y * ppm),
-			rl.WHITE,
-		)
-
-		if paused {
-			rl.DrawText("Paused", 10, 10, 20, rl.RED)
-		} else {
-			rl.DrawText("Running", 10, 10, 20, rl.GREEN)
-		}
-
-		if gravity_enabled {
-			rl.DrawText("Gravity: Enabled", 10, 30, 20, rl.GREEN)
-		} else {
-			rl.DrawText("Gravity: Disabled", 10, 30, 20, rl.RED)
-		}
+		draw_body(body, &l_motor, &r_motor)
+		draw_ui(paused, gravity_enabled, &l_motor, &r_motor, &body)
 
 		rl.EndDrawing()
 	}
