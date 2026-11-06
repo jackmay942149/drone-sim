@@ -11,9 +11,17 @@ In root directory:
 `odin build .`
 
 ## Test
+### All
+In root directory:
+`odin test -all-packages .`
+
 ### Physics
 In root directory:
 `odin test .\physics\`
+
+### Machine Learnign
+In root directory:
+`odin test .\ml\`
 
 # Dependencies
 | Name | Version | Installation | Status |

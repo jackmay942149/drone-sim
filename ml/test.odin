@@ -18,8 +18,26 @@ test_neuron_activation :: proc(t: ^testing.T) {
 	z := weighted_sum(neuron, inputs[:])
 	testing.expectf(t, abs(z - 2.35) < float_error, "Expected: 2.35\nGot: %f", z)
 
+	// ReLU
 	a := relu(z)
 	testing.expectf(t, abs(a - 2.35) < float_error, "Expected: 2.35\nGot: %f", a)
+
+	a = neuron_forward(neuron, inputs, .ReLU)
+	testing.expectf(t, abs(a - 2.35) < float_error, "Expected: 2.35\nGot: %f", a)
+
+	// Sigmoid
+	a = sigmoid(z)
+	testing.expectf(t, abs(a - 0.9129) < float_error, "Expected: 0.9129\nGot: %f", a)
+
+	a = neuron_forward(neuron, inputs, .Sigmoid)
+	testing.expectf(t, abs(a - 0.9129) < float_error, "Expected: 0.9129\nGot: %f", a)
+
+	// Tanh
+	a = tanh(z)
+	testing.expectf(t, abs(a - 0.982) < float_error, "Expected: 0.982\nGot: %f", a)
+
+	a = neuron_forward(neuron, inputs, .Tanh)
+	testing.expectf(t, abs(a - 0.982) < float_error, "Expected: 0.982\nGot: %f", a)
 }
 
 @(test)
