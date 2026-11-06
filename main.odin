@@ -111,6 +111,7 @@ draw_ui :: proc(paused, gravity_enabled: bool, l_motor, r_motor: ^Motor, body: ^
 	}
 
 	b := strings.builder_make()
+	defer strings.builder_destroy(&b)
 	fmt.sbprintf(&b, "Thrust Left: %v", l_motor.thrust)
 	rl.DrawText(strings.to_cstring(&b), 10, 50, 20, rl.WHITE)
 
