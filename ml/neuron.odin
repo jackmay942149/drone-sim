@@ -14,29 +14,27 @@ Neuron_Activation_Strategy :: enum {
 	Tanh,
 }
 
-neuron_forward :: proc(neuron: Neuron, input: []f32) -> f32 {
+neuron_forward :: proc(neuron: Neuron, input: []f32) -> (z: f32) {
 	assert(len(neuron.weights) == len(input))
 
-	z := neuron.bias
+	z = neuron.bias
 	for i in 0 ..< len(neuron.weights) {
 		z += (neuron.weights[i] * input[i])
 	}
-
-	switch neuron.strategy {
-	case .ReLU:
-		{
-			return max(0, z)
-		}
-	case .Sigmoid:
-		{
-			return 1 / (1 + math.exp(-z))
-		}
-	case .Tanh:
-		{
-			return math.tanh(z)
-
-		}
-	}
-	unreachable()
+	return z
 }
+
+@(private)
+relu :: proc(z: f32) -> (a: f32) {
+	return max(0, z)
+}
+
+@(private)
+sigmoid :: proc(z: f32) -> (a: f32) {
+	return 1 / (1 + math.exp(-z))
+}
+
+@(private)
+tanh :: proc(z: f32) -> (a: f32) {
+	return math.tanh(z)}
 
