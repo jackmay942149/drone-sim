@@ -1,6 +1,6 @@
 package ml
 
-Nueron :: struct {
+Neuron :: struct {
 	weights: []f32,
 	bias:    f32,
 }
