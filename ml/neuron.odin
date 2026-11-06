@@ -3,9 +3,8 @@ package ml
 import "core:math"
 
 Neuron :: struct {
-	weights:  []f32,
-	bias:     f32,
-	strategy: Neuron_Activation_Strategy,
+	weights: []f32,
+	bias:    f32,
 }
 
 Neuron_Activation_Strategy :: enum {
