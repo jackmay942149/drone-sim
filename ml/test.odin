@@ -95,3 +95,215 @@ test_invalid_input_vector :: proc(t: ^testing.T) {
 	_ = neuron_forward(neuron, inputs, .ReLU)
 }
 
+@(test)
+test_layer_construction :: proc(t: ^testing.T) {
+	layer := layer_create(3, 5, .ReLU)
+	defer layer_delete(layer)
+
+	testing.expectf(t, len(layer.neurons) == 5, "Expected: 5\nGot: %v", layer.neurons)
+	testing.expectf(t, len(layer.weights) == 15, "Expected: 15\nGot: %v", layer.weights)
+	testing.expectf(t, len(layer.output) == 5, "Expected: 5\nGot: %v", layer.output)
+	testing.expectf(t, layer.strategy == .ReLU, "Expected: ReLU\nGot: %v", layer.strategy)
+	for n in layer.neurons {
+		testing.expectf(t, len(n.weights) == 3, "Expected: 3\nGot: %v", len(n.weights))
+	}
+}
+
+@(test)
+test_forward_propagation :: proc(t: ^testing.T) {
+	layer := layer_create(3, 5, .ReLU)
+	defer layer_delete(layer)
+
+	layer.neurons[0].bias = 0.5
+	layer.neurons[1].bias = -1
+	layer.neurons[2].bias = 0
+	layer.neurons[3].bias = 0
+	layer.neurons[4].bias = 0.1
+
+	layer.neurons[0].weights[0] = 1
+	layer.neurons[0].weights[1] = 0
+	layer.neurons[0].weights[2] = 0
+
+	layer.neurons[1].weights[0] = 0
+	layer.neurons[1].weights[1] = 1
+	layer.neurons[1].weights[2] = 0
+
+	layer.neurons[2].weights[0] = 0
+	layer.neurons[2].weights[1] = 0
+	layer.neurons[2].weights[2] = 1
+
+	layer.neurons[3].weights[0] = -1
+	layer.neurons[3].weights[1] = 0
+	layer.neurons[3].weights[2] = 0
+
+	layer.neurons[4].weights[0] = 0.5
+	layer.neurons[4].weights[1] = -0.25
+	layer.neurons[4].weights[2] = 0.75
+
+	input := []f32{1, 2, 3}
+	layer_forward(layer, input)
+
+	testing.expectf(
+		t,
+		abs(layer.output[0] - 1.5) < float_error,
+		"Expected: 1.5\nGot: %v",
+		layer.output[0],
+	)
+
+	testing.expectf(
+		t,
+		abs(layer.output[1] - 1) < float_error,
+		"Expected: 1\nGot: %v",
+		layer.output[1],
+	)
+
+	testing.expectf(
+		t,
+		abs(layer.output[2] - 3) < float_error,
+		"Expected: 3\nGot: %v",
+		layer.output[2],
+	)
+
+	testing.expectf(t, abs(layer.output[3]) < float_error, "Expected: 0\nGot: %v", layer.output[3])
+
+	testing.expectf(
+		t,
+		abs(layer.output[4] - 2.35) < float_error,
+		"Expected: 2.35\nGot: %v",
+		layer.output[4],
+	)
+}
+
+@(test)
+test_layer_activation_strategy :: proc(t: ^testing.T) {
+	layer := layer_create(3, 2, .ReLU)
+	defer layer_delete(layer)
+
+	layer.neurons[0].bias = 1
+	layer.neurons[1].bias = -1
+	input := []f32{1, 2, 3}
+
+	z1 := weighted_sum(layer.neurons[0], input)
+	z2 := weighted_sum(layer.neurons[1], input)
+	testing.expectf(t, abs(z1 - 1) < float_error, "Expected: 1\nGot: %v", z1)
+	testing.expectf(t, abs(z2 + 1) < float_error, "Expected: -1\nGot: %v", z2)
+
+	layer_forward(layer, input)
+	testing.expectf(
+		t,
+		abs(layer.output[0] - 1) < float_error,
+		"Expected: 1\nGot: %v",
+		layer.output[0],
+	)
+	testing.expectf(t, abs(layer.output[1]) < float_error, "Expected: 0\nGot: %v", layer.output[1])
+
+	layer.strategy = .Sigmoid
+	layer_forward(layer, input)
+	testing.expectf(
+		t,
+		abs(layer.output[0] - 0.7311) < float_error,
+		"Expected: 0.7311\nGot: %v",
+		layer.output[0],
+	)
+	testing.expectf(
+		t,
+		abs(layer.output[1] - 0.2689) < float_error,
+		"Expected: 0.2689\nGot: %v",
+		layer.output[1],
+	)
+
+	layer.strategy = .Tanh
+	layer_forward(layer, input)
+	testing.expectf(
+		t,
+		abs(layer.output[0] - 0.7616) < float_error,
+		"Expected: 0.7616\nGot: %v",
+		layer.output[0],
+	)
+	testing.expectf(
+		t,
+		abs(layer.output[1] + 0.7616) < float_error,
+		"Expected: -0.7616\nGot: %v",
+		layer.output[1],
+	)
+}
+
+@(test)
+test_layer_weight_independence :: proc(t: ^testing.T) {
+	layer := layer_create(3, 5, .ReLU, context.allocator)
+	defer layer_delete(layer, context.allocator)
+
+	layer.neurons[0].bias = 0.5
+	layer.neurons[1].bias = -1
+	layer.neurons[2].bias = 0
+	layer.neurons[3].bias = 0
+	layer.neurons[4].bias = 0.1
+
+	layer.neurons[0].weights[0] = 1
+	layer.neurons[0].weights[1] = 0
+	layer.neurons[0].weights[2] = 0
+
+	layer.neurons[1].weights[0] = 0
+	layer.neurons[1].weights[1] = 1
+	layer.neurons[1].weights[2] = 0
+
+	layer.neurons[2].weights[0] = 0
+	layer.neurons[2].weights[1] = 0
+	layer.neurons[2].weights[2] = 1
+
+	layer.neurons[3].weights[0] = -1
+	layer.neurons[3].weights[1] = 0
+	layer.neurons[3].weights[2] = 0
+
+	layer.neurons[4].weights[0] = 0.5
+	layer.neurons[4].weights[1] = -0.25
+	layer.neurons[4].weights[2] = 0.75
+
+	input := []f32{1, 2, 3}
+
+	// Run forward propagation and record outputs
+	layer_forward(layer, input)
+	outputs := make([]f32, len(layer.output), context.temp_allocator)
+	defer free_all(context.temp_allocator)
+	copy_slice(outputs, layer.output)
+
+	layer.neurons[0].weights[0] = 2
+	layer_forward(layer, input)
+
+	testing.expectf(t, abs(outputs[0] - 1.5) < float_error, "Expected: 1.5\nGot %v", outputs[0])
+	testing.expectf(
+		t,
+		abs(layer.output[0] - 2.5) < float_error,
+		"Expected: 2.5\nGot %v",
+		layer.output[0],
+	)
+
+	testing.expectf(t, abs(outputs[1] - 1) < float_error, "Expected: 1\nGot %v", outputs[1])
+	testing.expectf(
+		t,
+		abs(layer.output[1] - 1) < float_error,
+		"Expected: 1\nGot %v",
+		layer.output[1],
+	)
+
+	testing.expectf(t, abs(outputs[2] - 3) < float_error, "Expected: 3\nGot %v", outputs[2])
+	testing.expectf(
+		t,
+		abs(layer.output[2] - 3) < float_error,
+		"Expected: 3\nGot %v",
+		layer.output[2],
+	)
+
+	testing.expectf(t, abs(outputs[3]) < float_error, "Expected: 0\nGot %v", outputs[3])
+	testing.expectf(t, abs(layer.output[3]) < float_error, "Expected: 0\nGot %v", layer.output[3])
+
+	testing.expectf(t, abs(outputs[4] - 2.35) < float_error, "Expected: 2.35\nGot %v", outputs[4])
+	testing.expectf(
+		t,
+		abs(layer.output[4] - 2.35) < float_error,
+		"Expected: 2.35\nGot %v",
+		layer.output[4],
+	)
+
+}
+

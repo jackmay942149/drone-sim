@@ -1,6 +1,6 @@
 package ml
 
-@(private = "file")
+@(private)
 Layer :: struct {
 	neurons:  []Neuron,
 	strategy: Neuron_Activation_Strategy,
