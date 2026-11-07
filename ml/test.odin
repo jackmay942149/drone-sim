@@ -304,6 +304,5 @@ test_layer_weight_independence :: proc(t: ^testing.T) {
 		"Expected: 2.35\nGot %v",
 		layer.output[4],
 	)
-
 }
 
