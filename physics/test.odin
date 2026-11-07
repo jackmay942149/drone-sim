@@ -18,12 +18,7 @@ test_angular_velocity :: proc(t: ^testing.T) {
 		update(&body, 1.0 / 120.0)
 	}
 
-	testing.expectf(
-		t,
-		abs(body.angular_velocity - 6) < float_error,
-		"Expected: 6\nGot: %f\n",
-		body.angular_velocity,
-	)
+	testing.expect(t, abs(body.angular_velocity - 6) < float_error)
 }
 
 @(test)
@@ -38,12 +33,7 @@ test_linear_velocity :: proc(t: ^testing.T) {
 		update(&body, 1.0 / 120.0)
 	}
 
-	testing.expectf(
-		t,
-		abs(body.velocity.x - 5) < float_error,
-		"Expected: 5\nGot: %f",
-		body.velocity.x,
-	)
+	testing.expect(t, abs(body.velocity.x - 5) < float_error)
 }
 
 @(test)
@@ -64,21 +54,9 @@ test_gravity :: proc(t: ^testing.T) {
 		update(&body_10kg, 1.0 / 120.0)
 	}
 
-	testing.expectf(
-		t,
-		abs(-body_2kg.velocity.y - gravity) < float_error,
-		"Expected: %f\nGot: %f",
-		gravity,
-		body_2kg.velocity.y,
-	)
+	testing.expect(t, abs(-body_2kg.velocity.y - gravity) < float_error)
 
-	testing.expectf(
-		t,
-		abs(-body_10kg.velocity.y - gravity) < float_error,
-		"Expected: %f\nGot: %f",
-		gravity,
-		body_10kg.velocity.y,
-	)
+	testing.expect(t, abs(-body_10kg.velocity.y - gravity) < float_error)
 
 }
 
@@ -92,19 +70,9 @@ test_force_accumulation :: proc(t: ^testing.T) {
 	add_force(&body, {10, 0})
 	add_force(&body, {-4, 3})
 
-	testing.expectf(
-		t,
-		abs(body.net_force.x - 6) < float_error,
-		"Expected: 6\nGot: %f",
-		body.net_force.x,
-	)
+	testing.expect(t, abs(body.net_force.x - 6) < float_error)
 
-	testing.expectf(
-		t,
-		abs(body.net_force.y - 3) < float_error,
-		"Expected: 3\nGot: %f",
-		body.net_force.y,
-	)
+	testing.expect(t, abs(body.net_force.y - 3) < float_error)
 }
 
 @(test)
@@ -116,22 +84,12 @@ test_torque_from_offcentre_force :: proc(t: ^testing.T) {
 	}
 	add_force_at_point(&body, {0, 10}, {0.5, 0})
 
-	testing.expectf(
-		t,
-		abs(body.net_torque - 5) < float_error,
-		"Expected: 5\nGot: %f",
-		body.net_torque,
-	)
+	testing.expect(t, abs(body.net_torque - 5) < float_error)
 
 	update(&body, 0)
 	add_force_at_point(&body, {0, 10}, {-0.5, 0})
 
-	testing.expectf(
-		t,
-		abs(body.net_torque + 5) < float_error,
-		"Expected: 5\nGot: %f",
-		body.net_torque,
-	)
+	testing.expect(t, abs(body.net_torque + 5) < float_error)
 }
 
 @(test)
@@ -143,21 +101,11 @@ test_balanced_force :: proc(t: ^testing.T) {
 	add_force_at_point(&body, {0, 10}, {-0.5, 0})
 	add_force_at_point(&body, {0, 10}, {0.5, 0})
 
-	testing.expectf(t, abs(body.net_torque) < float_error, "Expected: 0\nGot: %f", body.net_torque)
+	testing.expect(t, abs(body.net_torque) < float_error)
 
-	testing.expectf(
-		t,
-		abs(body.net_force.x) < float_error,
-		"Expected: 0\nGot: %f",
-		body.net_force.x,
-	)
+	testing.expect(t, abs(body.net_force.x) < float_error)
 
-	testing.expectf(
-		t,
-		abs(body.net_force.y - 20) < float_error,
-		"Expected: 20\nGot: %f",
-		body.net_force.y,
-	)
+	testing.expect(t, abs(body.net_force.y - 20) < float_error)
 }
 
 @(test)
@@ -169,8 +117,8 @@ test_local_to__world_transformation :: proc(t: ^testing.T) {
 	}
 	world := local_force_to_world(body, {0, 10})
 
-	testing.expectf(t, abs(world.x + 10) < float_error, "Expected: -10\nGot: %f", world.x)
-	testing.expectf(t, abs(world.y) < float_error, "Expected: 0\nGot: %f", world.y)
+	testing.expect(t, abs(world.x + 10) < float_error)
+	testing.expect(t, abs(world.y) < float_error)
 
 	body = Body {
 		mass     = 1,
@@ -180,8 +128,8 @@ test_local_to__world_transformation :: proc(t: ^testing.T) {
 	}
 	world = local_force_to_world(body, {0, 10})
 
-	testing.expectf(t, abs(world.x + 10) < float_error, "Expected: -10\nGot: %f", world.x)
-	testing.expectf(t, abs(world.y) < float_error, "Expected: 0\nGot: %f", world.y)
+	testing.expect(t, abs(world.x + 10) < float_error)
+	testing.expect(t, abs(world.y) < float_error)
 }
 
 @(test)
@@ -200,27 +148,9 @@ test_force_and_torque_clearing :: proc(t: ^testing.T) {
 
 	update(&body, 1)
 
-	testing.expectf(
-		t,
-		abs(body.velocity.x - initial_velocity.x) < float_error,
-		"Expected: %f\nGot: %f",
-		initial_velocity.x,
-		body.velocity.x,
-	)
-	testing.expectf(
-		t,
-		abs(body.velocity.y - initial_velocity.y) < float_error,
-		"Expected: %f\nGot: %f",
-		initial_velocity.y,
-		body.velocity.y,
-	)
-	testing.expectf(
-		t,
-		abs(body.angular_velocity - initial_angular_velocity) < float_error,
-		"Expected: %f\nGot: %f",
-		initial_angular_velocity,
-		body.angular_velocity,
-	)
+	testing.expect(t, abs(body.velocity.x - initial_velocity.x) < float_error)
+	testing.expect(t, abs(body.velocity.y - initial_velocity.y) < float_error)
+	testing.expect(t, abs(body.angular_velocity - initial_angular_velocity) < float_error)
 }
 
 @(test)
@@ -234,26 +164,11 @@ test_conservation_of_motion :: proc(t: ^testing.T) {
 
 	for _ in 0 ..< 120 {
 		update(&body, 1.0 / 120.0)
-		testing.expectf(
-			t,
-			abs(body.angular_velocity - 1) < float_error,
-			"Expected: 1\nGot: %f",
-			body.angular_velocity,
-		)
+		testing.expect(t, abs(body.angular_velocity - 1) < float_error)
 
-		testing.expectf(
-			t,
-			abs(body.velocity.x - 1) < float_error,
-			"Expected: 1\nGot: %f",
-			body.velocity.x,
-		)
+		testing.expect(t, abs(body.velocity.x - 1) < float_error)
 
-		testing.expectf(
-			t,
-			abs(body.velocity.y - 1) < float_error,
-			"Expected: 1\nGot: %f",
-			body.velocity.y,
-		)
+		testing.expect(t, abs(body.velocity.y - 1) < float_error)
 
 	}
 }
