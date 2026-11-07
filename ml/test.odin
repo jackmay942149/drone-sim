@@ -230,7 +230,7 @@ test_layer_activation_strategy :: proc(t: ^testing.T) {
 
 @(test)
 test_layer_weight_independence :: proc(t: ^testing.T) {
-	layer := layer_create(3, 5, .ReLU, context.allocator)
+	layer := layer_create(3, 5, .ReLU, false, context.allocator)
 	defer layer_delete(layer, context.allocator)
 
 	layer.neurons[0].bias = 0.5
