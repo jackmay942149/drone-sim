@@ -38,7 +38,7 @@ layer_forward :: proc(layer: Layer, input: []f32) {
 }
 
 layer_delete :: proc(layer: Layer, allocator := context.allocator) {
-	delete(layer.weights)
+	delete(layer.weights, allocator)
 	delete(layer.neurons, allocator)
 	delete(layer.output, allocator)
 }
