@@ -306,3 +306,28 @@ test_layer_weight_independence :: proc(t: ^testing.T) {
 	)
 }
 
+@(test)
+test_network_construction :: proc(t: ^testing.T) {
+	network := network_create(3, 2, []int{5}, []Neuron_Activation_Strategy{.ReLU, .Sigmoid}, false)
+
+	testing.expect_value(t, len(network.layers), 2)
+	testing.expect_value(t, len(network.layers[0].neurons), 5)
+	testing.expect_value(t, len(network.layers[0].weights), 15)
+	testing.expect_value(t, len(network.layers[0].output), 5)
+	testing.expect_value(t, network.layers[0].strategy, .ReLU)
+
+	for neuron in network.layers[0].neurons {
+		testing.expect_value(t, len(neuron.weights), 3)
+	}
+
+	testing.expect_value(t, len(network.layers[1].neurons), 2)
+	testing.expect_value(t, len(network.layers[1].weights), 10)
+	testing.expect_value(t, len(network.layers[1].output), 2)
+	testing.expect_value(t, network.layers[1].strategy, .Sigmoid)
+
+	for neuron in network.layers[1].neurons {
+		testing.expect_value(t, len(neuron.weights), 5)
+	}
+	defer network_delete(network)
+}
+
