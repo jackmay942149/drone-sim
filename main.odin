@@ -98,7 +98,12 @@ draw_grid :: proc(delta_x, delta_y: f32) {
 
 }
 
-draw_ui :: proc(paused, gravity_enabled: bool, l_motor, r_motor: ^Motor, body: ^physics.Body) {
+draw_ui :: proc(
+	paused, gravity_enabled: bool,
+	l_motor, r_motor: ^Motor,
+	body: ^physics.Body,
+	allocator := context.temp_allocator,
+) {
 	if paused {
 		rl.DrawText("Paused", 10, 10, 20, rl.RED)
 	} else {
@@ -111,8 +116,7 @@ draw_ui :: proc(paused, gravity_enabled: bool, l_motor, r_motor: ^Motor, body: ^
 		rl.DrawText("Gravity: Disabled", 10, 30, 20, rl.RED)
 	}
 
-	b := strings.builder_make(context.temp_allocator)
-	defer free_all(context.temp_allocator)
+	b := strings.builder_make(allocator)
 	fmt.sbprintf(&b, "Thrust Left: %v", l_motor.thrust)
 	rl.DrawText(strings.to_cstring(&b), 10, 50, 20, rl.WHITE)
 
@@ -221,6 +225,7 @@ main :: proc() {
 		draw_grid(1, 1)
 		draw_body(body, &l_motor, &r_motor)
 		draw_ui(paused, gravity_enabled, &l_motor, &r_motor, &body)
+		free_all(context.temp_allocator)
 
 		rl.EndDrawing()
 	}
