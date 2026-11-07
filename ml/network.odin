@@ -67,6 +67,6 @@ network_delete :: proc(network: Network, allocator := context.allocator) {
 	for layer in network.layers {
 		layer_delete(layer, allocator)
 	}
-	delete(network.layers)
+	delete(network.layers, allocator)
 }
 
