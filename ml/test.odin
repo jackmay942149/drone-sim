@@ -334,3 +334,38 @@ test_full_forward_propagation :: proc(t: ^testing.T) {
 	testing.expect(t, abs(input[2] - 3) < float_error)
 }
 
+@(test)
+test_network_parameter_setters :: proc(t: ^testing.T) {
+	network := network_create(3, 2, []int{5}, []Neuron_Activation_Strategy{.ReLU, .Sigmoid})
+	defer network_delete(network)
+
+	network_set_weight(network, 0, 2, 1, 0.75)
+	network_set_bias(network, 0, 2, -0.25)
+	network_set_weight(network, 1, 1, 2, -2)
+	network_set_bias(network, 1, 1, 0.5)
+
+	testing.expect(t, abs(network.layers[0].neurons[2].weights[1] - 0.75) < float_error)
+	testing.expect(t, abs(network.layers[0].neurons[2].bias + 0.25) < float_error)
+	testing.expect(t, abs(network.layers[1].neurons[1].weights[2] + 2) < float_error)
+	testing.expect(t, abs(network.layers[1].neurons[1].bias - 0.5) < float_error)
+
+	output := network_forward(network, []f32{1, 2, 3})
+	testing.expect(t, abs(output[0] - 0.5) < float_error)
+	testing.expect(t, abs(output[1] - 0.119203) < float_error)
+}
+
+@(test)
+test_random_weight_initialisation :: proc(t: ^testing.T) {
+
+	network := network_create(3, 2, []int{5}, []Neuron_Activation_Strategy{.ReLU, .Sigmoid}, true)
+	defer network_delete(network)
+
+	for weight in network.layers[0].weights {
+		testing.expect(t, abs(weight) < 1.41214)
+	}
+
+	for weight in network.layers[1].weights {
+		testing.expect(t, abs(weight) < 0.925820)
+	}
+}
+
