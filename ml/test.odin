@@ -266,3 +266,71 @@ test_network_construction :: proc(t: ^testing.T) {
 	defer network_delete(network)
 }
 
+@(test)
+test_full_forward_propagation :: proc(t: ^testing.T) {
+	network := network_create(3, 2, []int{5}, []Neuron_Activation_Strategy{.ReLU, .Sigmoid}, false)
+	network_delete(network)
+
+	// Layer 0, Neuron 0
+	network_set_weight(network, 0, 0, 0, 1)
+	network_set_weight(network, 0, 0, 1, 0)
+	network_set_weight(network, 0, 0, 2, 0)
+	network_set_bias(network, 0, 0, 0.5)
+
+	// Layer 0, Neuron 1
+	network_set_weight(network, 0, 1, 0, 0)
+	network_set_weight(network, 0, 1, 1, 1)
+	network_set_weight(network, 0, 1, 2, 0)
+	network_set_bias(network, 0, 1, -1)
+
+	// Layer 0, Neuron 2
+	network_set_weight(network, 0, 2, 0, 0)
+	network_set_weight(network, 0, 2, 1, 0)
+	network_set_weight(network, 0, 2, 2, 1)
+	network_set_bias(network, 0, 2, 0)
+
+	// Layer 0, Neuron 3
+	network_set_weight(network, 0, 3, 0, -1)
+	network_set_weight(network, 0, 3, 1, 0)
+	network_set_weight(network, 0, 3, 2, 0)
+	network_set_bias(network, 0, 3, 0)
+
+	// Layer 0, Neuron 4
+	network_set_weight(network, 0, 4, 0, 0.5)
+	network_set_weight(network, 0, 4, 1, -0.25)
+	network_set_weight(network, 0, 4, 2, 0.75)
+	network_set_bias(network, 0, 4, 0.1)
+
+	// Layer 1, Neuron 0
+	network_set_weight(network, 1, 0, 0, 1)
+	network_set_weight(network, 1, 0, 1, 1)
+	network_set_weight(network, 1, 0, 2, -0.5)
+	network_set_weight(network, 1, 0, 3, 0)
+	network_set_weight(network, 1, 0, 4, 0)
+	network_set_bias(network, 1, 0, -1)
+
+	// Layer 1, Neuron 1
+	network_set_weight(network, 1, 1, 0, 0)
+	network_set_weight(network, 1, 1, 1, 0)
+	network_set_weight(network, 1, 1, 2, 1)
+	network_set_weight(network, 1, 1, 3, 0)
+	network_set_weight(network, 1, 1, 4, -1)
+	network_set_bias(network, 1, 1, 0.35)
+
+
+	input := []f32{1, 2, 3}
+
+	output := network_forward(network, input)
+	testing.expect_value(t, len(output), 2)
+	testing.expect(t, abs(network.layers[0].output[0] - 1.5) < float_error)
+	testing.expect(t, abs(network.layers[0].output[1] - 1) < float_error)
+	testing.expect(t, abs(network.layers[0].output[2] - 3) < float_error)
+	testing.expect(t, abs(network.layers[0].output[3]) < float_error)
+	testing.expect(t, abs(network.layers[0].output[4] - 2.35) < float_error)
+	testing.expect(t, abs(output[0] - 0.5) < float_error)
+	testing.expect(t, abs(output[1] - 0.731059) < float_error)
+	testing.expect(t, abs(input[0] - 1) < float_error)
+	testing.expect(t, abs(input[1] - 2) < float_error)
+	testing.expect(t, abs(input[2] - 3) < float_error)
+}
+
