@@ -369,3 +369,21 @@ test_random_weight_initialisation :: proc(t: ^testing.T) {
 	}
 }
 
+@(test)
+test_mse_identical :: proc(t: ^testing.T) {
+	out := loss_mse([]f32{0.2, 0.8}, []f32{0.2, 0.8})
+	testing.expect(t, abs(out) < float_error)
+}
+
+@(test)
+test_mse_single :: proc(t: ^testing.T) {
+	out := loss_mse([]f32{0.5}, []f32{1})
+	testing.expect(t, abs(out - 0.25) < float_error)
+}
+
+@(test)
+test_mse_multiple :: proc(t: ^testing.T) {
+	out := loss_mse([]f32{0.5, 0.25}, []f32{1, 0})
+	testing.expect(t, abs(out - 0.15635) < float_error)
+}
+
