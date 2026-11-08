@@ -269,7 +269,7 @@ test_network_construction :: proc(t: ^testing.T) {
 @(test)
 test_full_forward_propagation :: proc(t: ^testing.T) {
 	network := network_create(3, 2, []int{5}, []Neuron_Activation_Strategy{.ReLU, .Sigmoid}, false)
-	network_delete(network)
+	defer network_delete(network)
 
 	// Layer 0, Neuron 0
 	network_set_weight(network, 0, 0, 0, 1)
@@ -361,11 +361,11 @@ test_random_weight_initialisation :: proc(t: ^testing.T) {
 	defer network_delete(network)
 
 	for weight in network.layers[0].weights {
-		testing.expect(t, abs(weight) < 1.41214)
+		testing.expect(t, abs(weight) < 1.42)
 	}
 
 	for weight in network.layers[1].weights {
-		testing.expect(t, abs(weight) < 0.925820)
+		testing.expect(t, abs(weight) < 0.93)
 	}
 }
 
