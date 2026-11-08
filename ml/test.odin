@@ -384,6 +384,6 @@ test_mse_single :: proc(t: ^testing.T) {
 @(test)
 test_mse_multiple :: proc(t: ^testing.T) {
 	out := loss_mse([]f32{0.5, 0.25}, []f32{1, 0})
-	testing.expect(t, abs(out - 0.15635) < float_error)
+	testing.expect(t, abs(out - 0.15625) < float_error)
 }
 
